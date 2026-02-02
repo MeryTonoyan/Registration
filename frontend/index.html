@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Auth + Profile + Admin (LocalStorage)</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+
+    <style>
+        body{
+            min-height:100vh;
+            background: radial-gradient(circle at top left, #0ea5e9 0, #1f2937 42%, #020617 100%);
+            font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+        }
+        .app-wrap{padding: 40px 14px;}
+        .glass{
+            background: rgba(15, 23, 42, .88);
+            border: 1px solid rgba(255,255,255,.08);
+            border-radius: 22px;
+            box-shadow: 0 10px 30px rgba(0,0,0,.35);
+        }
+        .brand{
+            display:flex; gap:12px; align-items:center;
+        }
+        .dot{
+            width:14px; height:14px; border-radius:99px;
+            background: linear-gradient(135deg, #22c55e, #0ea5e9);
+            box-shadow: 0 0 0 4px rgba(34,197,94,.15);
+        }
+        .muted{color: rgba(255,255,255,.65)}
+        .small-muted{color: rgba(255,255,255,.55); font-size:.92rem}
+        .form-control, .form-select{
+            background: rgba(2, 6, 23, .35) !important;
+            border-color: rgba(255,255,255,.10) !important;
+            color: #fff !important;
+        }
+        .form-control::placeholder{color: rgba(255,255,255,.45)}
+        .nav-pills .nav-link{
+            color: rgba(255,255,255,.75);
+            border: 1px solid rgba(255,255,255,.08);
+            margin-right: 8px;
+        }
+        .nav-pills .nav-link.active{
+            background: rgba(14,165,233,.20);
+            border-color: rgba(14,165,233,.35);
+            color:#fff;
+        }
+        .card-soft{
+            background: rgba(2, 6, 23, .35);
+            border: 1px solid rgba(255,255,255,.08);
+            border-radius: 18px;
+        }
+        .badge-soft{
+            background: rgba(34,197,94,.14);
+            border: 1px solid rgba(34,197,94,.22);
+            color:#b9f6d0;
+        }
+    </style>
+</head>
+
+<body>
+<div class="app-wrap">
+    <div class="container" style="max-width:1100px;">
+        <div class="glass p-4 p-md-5 text-white">
+
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+                <div class="brand">
+                    <span class="dot"></span>
+                    <div>
+                        <div class="fw-bold fs-4">Auth System</div>
+                        <div class="small-muted">Login • Register • Profile • Admin • LocalStorage</div>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center gap-2">
+                    <span id="sessionBadge" class="badge badge-soft d-none"></span>
+                    <button id="btnLogoutTop" class="btn btn-outline-light btn-sm d-none">Logout</button>
+                </div>
+            </div>
+
+            <div id="alertBox" class="alert d-none" role="alert"></div>
+
+            <!-- Guest Area -->
+            <div id="guestArea" class="row g-4">
+                <!-- Login -->
+                <div class="col-12 col-lg-6">
+                    <div class="card-soft p-4">
+                        <h5 class="mb-3">Login</h5>
+
+                        <form id="loginForm" class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label muted">Email</label>
+                                <input id="loginEmail" type="email" class="form-control" placeholder="example@mail.com" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label muted">Password</label>
+                                <input id="loginPassword" type="password" class="form-control" placeholder="••••••••" required>
+                            </div>
+                            <div class="col-12 d-grid">
+                                <button class="btn btn-info fw-semibold" type="submit">Login</button>
+                            </div>
+                            <div class="col-12 small-muted">
+                                Tip: Register first, then login.
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Register -->
+                <div class="col-12 col-lg-6">
+                    <div class="card-soft p-4">
+                        <h5 class="mb-3">Register</h5>
+
+                        <form id="registerForm" class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label muted">Full name</label>
+                                <input id="regName" type="text" class="form-control" placeholder="John Doe" required>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label muted">Email</label>
+                                <input id="regEmail" type="email" class="form-control" placeholder="example@mail.com" required>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label muted">Password</label>
+                                <input id="regPassword" type="password" class="form-control" placeholder="Min 6 chars" required>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label muted">Confirm password</label>
+                                <input id="regPassword2" type="password" class="form-control" placeholder="Repeat password" required>
+                            </div>
+
+                            <div class="col-12 d-flex align-items-center gap-2">
+                                <input id="regIsAdmin" class="form-check-input" type="checkbox">
+                                <label for="regIsAdmin" class="form-check-label muted">Register as admin</label>
+                            </div>
+
+                            <div class="col-12 d-grid">
+                                <button class="btn btn-success fw-semibold" type="submit">Create account</button>
+                            </div>
+
+                            <div class="col-12 small-muted">
+                                Admin gets an extra Admin panel after login.
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- App Area (after login) -->
+            <div id="appArea" class="d-none">
+                <ul class="nav nav-pills mb-4" id="tabs">
+                    <li class="nav-item"><button class="nav-link active" data-tab="tabProfile" type="button">Profile</button></li>
+                    <li class="nav-item"><button class="nav-link" data-tab="tabChangePass" type="button">Change password</button></li>
+                    <li class="nav-item"><button class="nav-link d-none" id="adminTabBtn" data-tab="tabAdmin" type="button">Admin</button></li>
+                </ul>
+
+                <div class="row g-4">
+                    <!-- Profile -->
+                    <div class="col-12" id="tabProfile">
+                        <div class="card-soft p-4">
+                            <div class="d-flex flex-wrap justify-content-between gap-2 align-items-center mb-3">
+                                <div>
+                                    <h5 class="mb-1">Profile</h5>
+                                    <div class="small-muted">Update your info (name/email)</div>
+                                </div>
+                                <button id="btnLogout" class="btn btn-outline-light btn-sm">Logout</button>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label muted">Role</label>
+                                    <input id="profileRole" class="form-control" disabled>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label muted">User ID</label>
+                                    <input id="profileId" class="form-control" disabled>
+                                </div>
+                            </div>
+
+                            <hr class="border border-white border-opacity-10 my-4"/>
+
+                            <form id="profileForm" class="row g-3">
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label muted">Full name</label>
+                                    <input id="profileName" type="text" class="form-control" required>
+                                </div>
+
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label muted">Email</label>
+                                    <input id="profileEmail" type="email" class="form-control" required>
+                                </div>
+
+                                <div class="col-12 d-grid d-md-flex gap-2">
+                                    <button class="btn btn-info fw-semibold" type="submit">Save changes</button>
+                                    <button id="btnResetProfile" class="btn btn-outline-light" type="button">Reset</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Change password -->
+                    <div class="col-12 d-none" id="tabChangePass">
+                        <div class="card-soft p-4">
+                            <h5 class="mb-1">Change password</h5>
+                            <div class="small-muted mb-3">For security, enter current password first.</div>
+
+                            <form id="passForm" class="row g-3">
+                                <div class="col-12 col-md-4">
+                                    <label class="form-label muted">Current password</label>
+                                    <input id="curPass" type="password" class="form-control" required>
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <label class="form-label muted">New password</label>
+                                    <input id="newPass" type="password" class="form-control" required>
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <label class="form-label muted">Confirm new password</label>
+                                    <input id="newPass2" type="password" class="form-control" required>
+                                </div>
+                                <div class="col-12 d-grid d-md-flex">
+                                    <button class="btn btn-success fw-semibold" type="submit">Update password</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Admin -->
+                    <div class="col-12 d-none" id="tabAdmin">
+                        <div class="card-soft p-4">
+                            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                                <div>
+                                    <h5 class="mb-1">Admin panel</h5>
+                                    <div class="small-muted">View users list (demo admin feature)</div>
+                                </div>
+                                <button id="btnRefreshUsers" class="btn btn-outline-light btn-sm">Refresh</button>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="table table-dark table-hover align-middle" style="--bs-table-bg: transparent;">
+                                    <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Role</th>
+                                        <th>Created</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="usersTbody"></tbody>
+                                </table>
+                            </div>
+
+                            <div class="small-muted mt-2">
+                                Note: This is LocalStorage demo, not real backend security.
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <hr class="border border-white border-opacity-10 my-4"/>
+            <div class="small-muted">
+                Storage keys: <code>auth_users_v1</code> and <code>auth_session_v1</code>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    const LS_USERS="auth_users_v1",LS_SESSION="auth_session_v1";function uid(){return"u_"+Math.random().toString(16).slice(2)+Date.now().toString(16)}function nowISO(){return(new Date).toISOString()}function getUsers(){try{return JSON.parse(localStorage.getItem(LS_USERS))||[]}catch{return[]}}function setUsers(e){localStorage.setItem(LS_USERS,JSON.stringify(e))}function getSession(){try{return JSON.parse(localStorage.getItem(LS_SESSION))||null}catch{return null}}function setSession(e){localStorage.setItem(LS_SESSION,JSON.stringify(e))}function clearSession(){localStorage.removeItem(LS_SESSION)}function showAlert(e,t){const n=document.getElementById("alertBox");n.className="alert alert-"+e,n.textContent=t,n.classList.remove("d-none"),setTimeout((()=>n.classList.add("d-none")),3500)}function isValidEmail(e){return/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e.trim())}function minLen(e,t){return(e||"").trim().length>=t}function findUserByEmail(e){return getUsers().find((t=>t.email.toLowerCase()===e.toLowerCase()))}function findUserById(e){return getUsers().find((t=>t.id===e))}function updateUser(e){const t=getUsers(),n=t.findIndex((t=>t.id===e.id));return-1!==n&&(t[n]=e,setUsers(t),!0)}function register({name:e,email:t,password:n,role:s}){const r=getUsers();if(!minLen(e,2))return{ok:!1,msg:"Name must be at least 2 characters."};if(!isValidEmail(t))return{ok:!1,msg:"Invalid email format."};if(!minLen(n,6))return{ok:!1,msg:"Password must be at least 6 characters."};if(r.some((e=>e.email.toLowerCase()===t.toLowerCase())))return{ok:!1,msg:"This email is already registered."};const o={id:uid(),name:e.trim(),email:t.trim(),password:n,role:s,createdAt:nowISO()};return r.push(o),setUsers(r),{ok:!0,msg:"Account created successfully! You can login now."}}function login({email:e,password:t}){if(!isValidEmail(e))return{ok:!1,msg:"Invalid email format."};if(!minLen(t,1))return{ok:!1,msg:"Password is required."};const n=findUserByEmail(e.trim());return n?n.password!==t?{ok:!1,msg:"Wrong password."}:(setSession({userId:n.id,loginAt:nowISO()}),{ok:!0,msg:"Login successful."}):{ok:!1,msg:"User not found. Please register first."}}function logout(){clearSession(),render(),showAlert("info","Logged out.")}const guestArea=document.getElementById("guestArea"),appArea=document.getElementById("appArea"),sessionBadge=document.getElementById("sessionBadge"),btnLogoutTop=document.getElementById("btnLogoutTop"),adminTabBtn=document.getElementById("adminTabBtn"),usersTbody=document.getElementById("usersTbody");function getCurrentUser(){const e=getSession();return e&&findUserById(e.userId)||null}function setTab(e){document.querySelectorAll("#tabs .nav-link").forEach((t=>{t.classList.toggle("active",t.dataset.tab===e)})),["tabProfile","tabChangePass","tabAdmin"].forEach((t=>{const n=document.getElementById(t);n&&n.classList.toggle("d-none",t!==e)}))}function fillProfile(e){document.getElementById("profileRole").value=e.role,document.getElementById("profileId").value=e.id,document.getElementById("profileName").value=e.name,document.getElementById("profileEmail").value=e.email}function renderAdminUsers(){const e=getCurrentUser();if(!e||"admin"!==e.role)return;const t=getUsers().slice().sort(((e,t)=>(e.createdAt||"").localeCompare(t.createdAt||"")));usersTbody.innerHTML=t.map(((e,t)=>`\n    <tr>\n      <td>${t+1}</td>\n      <td>${escapeHtml(e.name)}</td>\n      <td>${escapeHtml(e.email)}</td>\n      <td><span class="badge ${"admin"===e.role?"text-bg-warning":"text-bg-secondary"}">${e.role}</span></td>\n      <td class="small text-white-50">${new Date(e.createdAt).toLocaleString()}</td>\n    </tr>\n  `)).join("")}function escapeHtml(e){return String(e??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}function render(){const e=getCurrentUser();if(!e)return guestArea.classList.remove("d-none"),appArea.classList.add("d-none"),sessionBadge.classList.add("d-none"),void btnLogoutTop.classList.add("d-none");guestArea.classList.add("d-none"),appArea.classList.remove("d-none"),sessionBadge.textContent=`${e.name} • ${e.role}`,sessionBadge.classList.remove("d-none"),btnLogoutTop.classList.remove("d-none"),"admin"===e.role?adminTabBtn.classList.remove("d-none"):adminTabBtn.classList.add("d-none"),fillProfile(e),setTab("tabProfile"),"admin"===e.role&&renderAdminUsers()}document.getElementById("tabs").addEventListener("click",(e=>{const t=e.target.closest("button[data-tab]");if(!t)return;const n=getCurrentUser();n&&("tabAdmin"!==t.dataset.tab||"admin"===n.role?(setTab(t.dataset.tab),"tabAdmin"===t.dataset.tab&&renderAdminUsers()):showAlert("danger","Access denied: Admins only."))})),document.getElementById("registerForm").addEventListener("submit",(e=>{e.preventDefault();const t=document.getElementById("regName").value,n=document.getElementById("regEmail").value,s=document.getElementById("regPassword").value,r=document.getElementById("regPassword2").value,o=document.getElementById("regIsAdmin").checked;if(s!==r)return void showAlert("danger","Passwords do not match.");const a=register({name:t,email:n,password:s,role:o?"admin":"user"});a.ok?(showAlert("success",a.msg),e.target.reset()):showAlert("danger",a.msg)})),document.getElementById("loginForm").addEventListener("submit",(e=>{e.preventDefault();const t=login({email:document.getElementById("loginEmail").value,password:document.getElementById("loginPassword").value});t.ok?(showAlert("success",t.msg),e.target.reset(),render()):showAlert("danger",t.msg)})),document.getElementById("profileForm").addEventListener("submit",(e=>{e.preventDefault();const t=getCurrentUser();if(!t)return void showAlert("danger","Please login.");const n=document.getElementById("profileName").value.trim(),s=document.getElementById("profileEmail").value.trim();if(!minLen(n,2))return void showAlert("danger","Name must be at least 2 characters.");if(!isValidEmail(s))return void showAlert("danger","Invalid email format.");if(getUsers().some((e=>e.id!==t.id&&e.email.toLowerCase()===s.toLowerCase())))return void showAlert("danger","This email is already used by another account.");updateUser({...t,name:n,email:s})?(showAlert("success","Profile updated."),render()):showAlert("danger","Could not update user.")})),document.getElementById("btnResetProfile").addEventListener("click",(()=>{const e=getCurrentUser();e&&(fillProfile(e),showAlert("info","Reset done."))})),document.getElementById("passForm").addEventListener("submit",(e=>{e.preventDefault();const t=getCurrentUser();if(!t)return void showAlert("danger","Please login.");const n=document.getElementById("curPass").value,s=document.getElementById("newPass").value,r=document.getElementById("newPass2").value;if(n!==t.password)return void showAlert("danger","Current password is incorrect.");if(!minLen(s,6))return void showAlert("danger","New password must be at least 6 characters.");if(s!==r)return void showAlert("danger","New passwords do not match.");if(s===n)return void showAlert("warning","New password must be different.");updateUser({...t,password:s})?(e.target.reset(),showAlert("success","Password updated.")):showAlert("danger","Could not update password.")})),document.getElementById("btnRefreshUsers").addEventListener("click",(()=>{const e=getCurrentUser();e&&"admin"===e.role?(renderAdminUsers(),showAlert("info","Users refreshed.")):showAlert("danger","Access denied: Admins only.")})),document.getElementById("btnLogout").addEventListener("click",logout),document.getElementById("btnLogoutTop").addEventListener("click",logout),render();
+</script>
+<script src="script.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+jspm_packages/
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables (Գաղտնի տվյալներ)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Production build (Եթե օգտագործում ես React/Vue)
+dist/
+build/
+
+# OS files
+.DS_Store
+Thumbs.db
