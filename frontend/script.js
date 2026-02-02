@@ -27,7 +27,6 @@ $('#registerForm').onsubmit = function(e) {
             alert("Success!");
         });
 };
-
 function updateUI() {
     fetch('http://localhost:3000/profile')
         .then(res => res.json())
@@ -41,7 +40,6 @@ function updateUI() {
             }
         });
 }
-
 $('#btnLogout').onclick = () => {
     fetch('http://localhost:3000/logout')
         .then(res => res.json())

@@ -1,6 +1,5 @@
 import express from 'express';
 import cors from 'cors';
-
 const app = express();
 app.use(express.json());
 app.use(cors());
@@ -19,7 +18,6 @@ app.post('/add', (req, res) => {
     values.push(value);
     res.json(value);
 });
-
 app.get('/profile', (req, res) => {
     if (req.session && req.session.user) {
         return res.json(req.session.user);
