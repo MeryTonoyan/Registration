@@ -1,5 +1,5 @@
 const $ = s => document.querySelector(s);
-const API = 'http://localhost:3005'; // Ստուգիր քո սերվերի պորտը
+const API = 'http://localhost:3005';
 
 
 $("#registerForm").onsubmit = (e) => {
