@@ -4,7 +4,6 @@ const API = 'http://localhost:3005';
 
 $("#registerForm").onsubmit = (e) => {
     e.preventDefault();
-
     const data = {
         name: $("#regName").value,
         email: $("#regEmail").value,
@@ -18,17 +17,16 @@ $("#registerForm").onsubmit = (e) => {
         body: JSON.stringify(data)
     })
         .then(res => res.json())
-        .then(user => {
-            alert("Account created for " + user.name);
+        .then(data => {
+            localStorage.setItem("token", data.token);
+            alert("Success!");
             location.reload();
-        })
-        .catch(err => alert("Registration failed"));
+        });
 };
 
 
 $("#loginForm").onsubmit = (e) => {
     e.preventDefault();
-
     const data = {
         email: $("#loginEmail").value,
         password: $("#loginPassword").value
@@ -37,28 +35,29 @@ $("#loginForm").onsubmit = (e) => {
     fetch(`${API}/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-        credentials: "include"
+        body: JSON.stringify(data)
     })
-        .then(res => {
-            if (!res.ok) throw new Error("Invalid login");
-            return res.json();
+        .then(res => res.json())
+        .then(data => {
+            if (data.token) {
+                localStorage.setItem("token", data.token);
+                alert("Welcome " + data.user.name);
+                location.reload();
+            }
         })
-        .then(user => {
-            alert("Welcome back " + user.name);
-            location.reload();
-        })
-        .catch(err => alert("Login failed: " + err.message));
+        .catch(err => alert("Login failed"));
 };
 
 
 const logout = () => {
-    fetch(`${API}/logout`, { credentials: "include" })
-        .then(() => {
-            alert("Logged out");
-            location.reload();
-        });
+    localStorage.removeItem("token");
+    location.reload();
 };
 
-if ($("#btnLogout")) $("#btnLogout").onclick = logout;
-if ($("#btnLogoutTop")) $("#btnLogoutTop").onclick = logout;
+
+const token = localStorage.getItem("token");
+if (token) {
+
+    $("#guestArea").classList.add("d-none");
+    $("#appArea").classList.remove("d-none");
+}
